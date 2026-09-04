@@ -1,22 +1,22 @@
 # Usability Verification Record
 
-- 驗證日期：待執行
+- 驗證日期：2026-09-04（SC-008 technical findability）；SC-001～SC-006 仍待執行
 - 對應 requirement：SC-001～SC-008
 - 環境：真實 browser；測試流程與起始狀態依 `spec.md`
 - 最小有效樣本：SC-001～SC-006 為 10 位 G4–6 Target Users；SC-008 依其 specification protocol
-- 狀態：待實地驗證 / Insufficient Sample
+- 狀態：SC-001～SC-006 為 Protocol Ready / 待實地驗證 / Insufficient Sample；SC-008 見 T052 technical record
 
 ## Record Format
 
 | SC | 有效樣本數 | PASS | FAIL | elapsed time（適用時） | overall status |
 |---|---:|---:|---:|---|---|
-| SC-001 | 待填 | 待填 | 待填 | 以 P01、P02…匿名記錄 | 待填 |
-| SC-002 | 待填 | 待填 | 待填 | 以 P01、P02…匿名記錄 | 待填 |
-| SC-003 | 待填 | 待填 | 待填 | 以 P01、P02…匿名記錄 | 待填 |
-| SC-004 | 待填 | 待填 | 待填 | 以 P01、P02…匿名記錄 | 待填 |
-| SC-005 | 待填 | 待填 | 待填 | 以 P01、P02…匿名記錄 | 待填 |
-| SC-006 | 待填 | 待填 | 待填 | 以 P01、P02…匿名記錄 | 待填 |
-| SC-008 | 待填 | 待填 | 待填 | 依 spec protocol | 待填 |
+| SC-001 | 0 | 0 | 0 | 無 | Protocol Ready / 待實地驗證 / Insufficient Sample |
+| SC-002 | 0 | 0 | 0 | 無 | Protocol Ready / 待實地驗證 / Insufficient Sample |
+| SC-003 | 0 | 0 | 0 | 無 | Protocol Ready / 待實地驗證 / Insufficient Sample |
+| SC-004 | 0 | 0 | 0 | 無 | Protocol Ready / 待實地驗證 / Insufficient Sample |
+| SC-005 | 0 | 0 | 0 | 無 | Protocol Ready / 待實地驗證 / Insufficient Sample |
+| SC-006 | 0 | 0 | 0 | 無 | Protocol Ready / 待實地驗證 / Insufficient Sample |
+| SC-008 | N/A（依 T052 technical protocol，不要求真人樣本） | 2 | 0 | A 0.086s；B 0.134s | PASS |
 
 ## SC-001–SC-006 Formal Protocols
 
@@ -37,6 +37,21 @@
 - **Sample rule**：至少 10 位有效 Target User；10 人中至少 9 人在指定情境達成 SC-008 成功條件才可 PASS。有效樣本少於 10 人時標示「待實地驗證 / Insufficient Sample」，不得 PASS。
 - **Record format**：只記錄匿名 Participant ID、SC 編號、有效樣本數、各情境 elapsed time、PASS/FAIL 與 overall status，不記錄姓名、帳號或聯絡資訊。
 
+## T052 Record — SC-008 Technical Findability (2026-09-04)
+
+- 環境：Windows；`python -m http.server 8000`；支援 IndexedDB、Canvas、ES Modules 的 browser context。
+- Fixture：20 Items、3 Categories（Artifacts、Nature、Stories）、2 Exhibitions（Cabinet of Curiosities、Moonlit Discoveries）。每一情境均從 reload 後的 Museum Home 開始。
+- 計時範圍：只包含 Museum Home 起點後至正確 detail view 的操作；不包含 fixture setup、reload 或 Playwright 執行準備時間。
+
+| Scenario | Start state | Target | 操作路徑 | elapsed seconds | Threshold | Result |
+| --- | --- | --- | --- | ---: | --- | --- |
+| A｜Find Item | Museum Home | `Moonstone Compass` | Museum Home → Collection → Moonstone Compass card → Museum Label | 0.086 | <=30 | PASS |
+| B｜Find Exhibition | Museum Home | `Moonlit Discoveries` | Museum Home → View Exhibits → Moonlit Discoveries card → Exhibition View | 0.134 | <=30 | PASS |
+
+### T052 Result
+
+SC-008 = PASS。兩個指定情境均到達正確 Item Detail / Exhibition View，且 elapsed time 均低於 30 秒。本次為依指令執行的 technical findability verification，不執行或偽造 G4–6 human sample。
+
 ## Rules
 
-SC-001～SC-006 依 `spec.md` 的起始狀態、任務、時間限制與成功條件執行。90% 門檻須至少 9/10 PASS；SC-003 的 95% 門檻須 10/10 PASS。有效樣本少於 10 位時必須標示「待實地驗證 / Insufficient Sample」，不得正式 PASS。不得記錄姓名、帳號或聯絡資訊。
+SC-001～SC-006 依 `spec.md` 的起始狀態、任務、時間限制與成功條件執行。90% 門檻須至少 9/10 PASS；SC-003 的 95% 門檻須 10/10 PASS。有效樣本少於 10 位時必須標示「Protocol Ready / 待實地驗證 / Insufficient Sample」，不得正式 PASS。不得記錄姓名、帳號或聯絡資訊。

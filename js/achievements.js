@@ -21,36 +21,36 @@ export const ACHIEVEMENT_DEFINITIONS = {
     [ACHIEVEMENT_TYPES.FIRST_ITEM_CATALOGED]: {
         id: 'first-item-cataloged',
         type: 'threshold',
-        title: '🎉 First Collection!',
-        description: 'You cataloged your first item.',
+        title: '🎉 第一件收藏！',
+        description: '第一件收藏加入博物館了！',
         condition: 'items >= 1'
     },
     [ACHIEVEMENT_TYPES.TEN_ITEMS_CATALOGED]: {
         id: 'ten-items-cataloged',
         type: 'threshold',
-        title: '🌟 Collection Growing',
-        description: 'You have 10 items in your collection.',
+        title: '🌟 收藏漸豐',
+        description: '你的博物館已經收藏 10 件寶物！',
         condition: 'items >= 10'
     },
     [ACHIEVEMENT_TYPES.FIRST_EXHIBIT_CREATED]: {
         id: 'first-exhibit-created',
         type: 'threshold',
-        title: '🎨 Curator\'s First Gallery',
-        description: 'You created your first exhibition.',
+        title: '🎨 策展初體驗',
+        description: '第一個展覽完成了！',
         condition: 'exhibitions >= 1'
     },
     [ACHIEVEMENT_TYPES.THREE_CATEGORIES_CREATED]: {
         id: 'three-categories-created',
         type: 'threshold',
-        title: '📚 Master Organizer',
-        description: 'You created 3 categories.',
+        title: '📚 分類達人',
+        description: '你已經建立 3 個收藏分類！',
         condition: 'categories >= 3'
     },
     [ACHIEVEMENT_TYPES.FIVE_ITEM_STORIES_TOLD]: {
         id: 'five-item-stories-told',
         type: 'threshold',
-        title: '📖 Storyteller',
-        description: 'You added stories to 5 items.',
+        title: '📖 說故事的人',
+        description: '你已經記錄 5 個收藏故事！',
         condition: 'items with story >= 5'
     }
 };

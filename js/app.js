@@ -16,7 +16,13 @@ const appState = {
     currentView: 'museum',
     currentItemId: null,
     currentExhibitionId: null,
+    editingExhibitionId: null,
+    exhibitionDraft: null,
     collectionFilter: 'all',
+    categoryManagerOpen: false,
+    addCategoryFormOpen: false,
+    renamingCategoryId: null,
+    categoryFormError: null,
     isLoading: false,
     error: null,
     draft: null,
@@ -122,6 +128,9 @@ async function renderCurrentView() {
             case 'exhibition':
                 await renderExhibitionDetailView();
                 break;
+            case 'create-exhibit':
+                await renderCreateExhibitView();
+                break;
             default:
                 await renderMuseumView();
         }
@@ -135,6 +144,10 @@ async function navigateTo(view, id = null) {
     appState.currentView = view;
     appState.currentItemId = view === 'item' ? id : null;
     appState.currentExhibitionId = view === 'exhibition' ? id : null;
+    if (view === 'create-exhibit') {
+        appState.editingExhibitionId = id;
+        appState.exhibitionDraft = null;
+    }
     await reloadData();
     await renderCurrentView();
 }
@@ -288,6 +301,22 @@ async function renderCollectionView() {
             <button class="btn btn-primary add-category-btn">+ Add Category</button>
         </div>
 
+        <details class="category-manager" ${appState.categoryManagerOpen ? 'open' : ''}>
+            <summary>Manage Categories</summary>
+            ${appState.addCategoryFormOpen ? `
+                <form id="add-category-form" class="category-inline-form">
+                    <label for="new-category-name" class="form-label">Category name</label>
+                    <input id="new-category-name" name="name" class="form-input" placeholder="e.g. Rocks" autocomplete="off">
+                    ${appState.categoryFormError ? `<div class="form-error" role="alert">${ui.escapeHtml(appState.categoryFormError)}</div>` : ''}
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary cancel-add-category">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Category</button>
+                    </div>
+                </form>
+            ` : ''}
+            ${ui.createCategoryManagerList(appState.data.categories, appState.data.items, appState.renamingCategoryId)}
+        </details>
+
         <div id="items-container" class="gallery">
     `;
 
@@ -329,9 +358,133 @@ async function renderCollectionView() {
     const addCatBtn = container.querySelector('.add-category-btn');
     if (addCatBtn) {
         addCatBtn.addEventListener('click', () => {
-            addCatBtn.setAttribute('aria-label', 'Category management is available in a later phase');
+            appState.categoryManagerOpen = true;
+            appState.addCategoryFormOpen = true;
+            appState.renamingCategoryId = null;
+            appState.categoryFormError = null;
+            renderCollectionView();
         });
     }
+
+    const addCategoryForm = container.querySelector('#add-category-form');
+    if (addCategoryForm) {
+        addCategoryForm.querySelector('#new-category-name').focus();
+        addCategoryForm.querySelector('.cancel-add-category').addEventListener('click', () => {
+            appState.addCategoryFormOpen = false;
+            appState.categoryFormError = null;
+            renderCollectionView();
+        });
+        addCategoryForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const name = new FormData(addCategoryForm).get('name') || '';
+            const result = categories.createCategory({ id: db.generateId(), name });
+            if (result.error) {
+                appState.categoryFormError = result.error;
+                renderCollectionView();
+                return;
+            }
+            const achievementsBefore = captureAchievementState();
+            try {
+                setLoading(true);
+                await db.put(db.STORE_NAMES.CATEGORIES, result);
+                appState.addCategoryFormOpen = false;
+                appState.categoryFormError = null;
+                await reloadData();
+                checkAchievements(achievementsBefore);
+                await renderCollectionView();
+            } catch (error) {
+                console.error('Category save failed:', error);
+                appState.categoryFormError = "We couldn't save this category yet. Try again.";
+                renderCollectionView();
+            } finally {
+                setLoading(false);
+            }
+        });
+    }
+
+    // Rename category handlers
+    container.querySelectorAll('.rename-category-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            appState.categoryManagerOpen = true;
+            appState.addCategoryFormOpen = false;
+            appState.renamingCategoryId = btn.dataset.id;
+            appState.categoryFormError = null;
+            renderCollectionView();
+        });
+    });
+
+    const renameForm = container.querySelector('#rename-category-form');
+    if (renameForm) {
+        renameForm.querySelector('input[name="name"]').focus();
+        renameForm.querySelector('.cancel-rename-category').addEventListener('click', () => {
+            appState.renamingCategoryId = null;
+            renderCollectionView();
+        });
+        renameForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const categoryId = renameForm.dataset.id;
+            const category = categories.getCategoryById(appState.data.categories, categoryId);
+            if (!category) return;
+            const name = new FormData(renameForm).get('name') || '';
+            const result = categories.updateCategory(category, { name });
+            if (result.error) {
+                appState.categoryFormError = result.error;
+                renderCollectionView();
+                return;
+            }
+            const achievementsBefore = captureAchievementState();
+            try {
+                setLoading(true);
+                await db.put(db.STORE_NAMES.CATEGORIES, result);
+                appState.renamingCategoryId = null;
+                appState.categoryFormError = null;
+                await reloadData();
+                checkAchievements(achievementsBefore);
+                await renderCollectionView();
+            } catch (error) {
+                console.error('Category rename failed:', error);
+                appState.categoryFormError = "We couldn't rename this category yet. Try again.";
+                renderCollectionView();
+            } finally {
+                setLoading(false);
+            }
+        });
+    }
+
+    // Delete category handlers
+    container.querySelectorAll('.delete-category-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const categoryId = btn.dataset.id;
+            const category = categories.getCategoryById(appState.data.categories, categoryId);
+            if (!category) return;
+            if (!window.confirm(`Delete "${category.name}"? Items keep their other details and become Uncategorized.`)) return;
+            const achievementsBefore = captureAchievementState();
+            try {
+                setLoading(true);
+                const originalItems = appState.data.items;
+                const updatedItems = categories.uncategorizeItems(originalItems, categoryId);
+                await db.transaction([db.STORE_NAMES.CATEGORIES, db.STORE_NAMES.ITEMS], (stores) => {
+                    stores[db.STORE_NAMES.CATEGORIES].delete(categoryId);
+                    updatedItems.forEach((item, index) => {
+                        if (item !== originalItems[index]) {
+                            stores[db.STORE_NAMES.ITEMS].put(item);
+                        }
+                    });
+                });
+                if (appState.collectionFilter === categoryId) {
+                    appState.collectionFilter = 'all';
+                }
+                await reloadData();
+                checkAchievements(achievementsBefore);
+                await renderCollectionView();
+            } catch (error) {
+                console.error('Category delete failed:', error);
+                showError("We couldn't delete this category yet. Try again.");
+            } finally {
+                setLoading(false);
+            }
+        });
+    });
 
     const emptyStateCTA = container.querySelector('[onclick*="empty-state-cta"]');
     if (emptyStateCTA) {
@@ -360,8 +513,8 @@ async function renderExhibitsView() {
     if (appState.data.exhibitions.length === 0) {
         html += ui.createEmptyState(
             '🎭',
-            'No Exhibitions Yet',
-            'Curate your first exhibition from your collection items.',
+            '還沒有展覽。從你的收藏挑幾件寶物，打造第一個展覽。',
+            '',
             'Create Exhibit'
         );
     } else {
@@ -396,16 +549,12 @@ async function renderExhibitsView() {
 
     const createBtn = container.querySelector('.create-exhibit-btn');
     if (createBtn) {
-        createBtn.addEventListener('click', () => {
-            // Show create exhibition dialog (implementation would go here)
-        });
+        createBtn.addEventListener('click', () => navigateTo('create-exhibit'));
     }
 
     const emptyStateCTA = container.querySelector('[onclick*="empty-state-cta"]');
     if (emptyStateCTA) {
-        emptyStateCTA.addEventListener('click', () => {
-            // Show create exhibition dialog
-        });
+        emptyStateCTA.addEventListener('click', () => navigateTo('create-exhibit'));
     }
 }
 
@@ -527,11 +676,13 @@ async function renderAddItemView() {
                 await renderAddItemView();
                 return;
             }
+            const achievementsBefore = captureAchievementState();
             try {
                 setLoading(true);
                 await db.put(db.STORE_NAMES.ITEMS, result);
                 appState.draft = null;
                 await reloadData();
+                checkAchievements(achievementsBefore);
                 container.innerHTML = `<div class="success-state"><h2>Added to your museum!</h2><div class="form-actions"><button type="button" class="btn btn-primary" id="view-new-item">View Item</button><button type="button" class="btn btn-secondary" id="add-another-item">Add Another</button></div></div>`;
                 container.querySelector('#view-new-item').addEventListener('click', () => navigateTo('item', result.id));
                 container.querySelector('#add-another-item').addEventListener('click', () => { appState.draft = null; renderAddItemView(); });
@@ -595,11 +746,13 @@ async function renderEditItemForm(item) {
             await renderEditItemForm(item);
             return;
         }
+        const achievementsBefore = captureAchievementState();
         try {
             setLoading(true);
             await db.put(db.STORE_NAMES.ITEMS, result);
             appState.draft = null;
             await reloadData();
+            checkAchievements(achievementsBefore);
             await renderItemDetailView();
         } catch (error) {
             console.error('Item edit failed:', error);
@@ -663,6 +816,7 @@ async function renderItemDetailView() {
     if (deleteBtn) {
         deleteBtn.addEventListener('click', async () => {
             if (!window.confirm('Remove this item from your museum?')) return;
+            const achievementsBefore = captureAchievementState();
             try {
                 setLoading(true);
                 const updatedExhibitions = items.removeItemFromExhibitions(appState.data.exhibitions, item.id);
@@ -670,6 +824,8 @@ async function renderItemDetailView() {
                     stores[db.STORE_NAMES.ITEMS].delete(item.id);
                     updatedExhibitions.forEach(exhibition => stores[db.STORE_NAMES.EXHIBITIONS].put(exhibition));
                 });
+                await reloadData();
+                checkAchievements(achievementsBefore);
                 await navigateTo('collection');
             } catch (error) {
                 showError('We could not remove this item yet. Your item is still here.');
@@ -691,7 +847,10 @@ async function renderItemDetailView() {
     const exhibitBtn = container.querySelector('.add-exhibit-btn');
     if (exhibitBtn) {
         exhibitBtn.addEventListener('click', () => {
-            // Handle add to exhibit
+            appState.editingExhibitionId = null;
+            appState.exhibitionDraft = { name: '', itemIds: [item.id], saveError: '' };
+            appState.currentView = 'create-exhibit';
+            reloadData().then(renderCurrentView);
         });
     }
 }
@@ -749,10 +908,180 @@ async function renderExhibitionDetailView() {
 
     const editBtn = container.querySelector('.btn-edit');
     if (editBtn) {
-        editBtn.addEventListener('click', () => {
-            // Handle edit exhibition
-        });
+        editBtn.addEventListener('click', () => navigateTo('create-exhibit', exhibition.id));
     }
+}
+
+/**
+ * Render Create / Edit Exhibit view (Exhibition Builder)
+ */
+async function renderCreateExhibitView() {
+    showView('view-create-exhibit');
+    const container = document.getElementById('create-exhibit-content');
+
+    const editingId = appState.editingExhibitionId;
+    const existing = editingId ? appState.data.exhibitions.find(e => e.id === editingId) : null;
+
+    if (editingId && !existing) {
+        container.innerHTML = ui.createEmptyState('❌', 'Exhibition Not Found');
+        return;
+    }
+
+    if (appState.data.items.length === 0) {
+        container.innerHTML = ui.createEmptyState(
+            '🖼',
+            'Add some items first',
+            'You need at least one collection item before you can build an exhibit.',
+            'Add Item'
+        );
+        const cta = container.querySelector('[onclick*="empty-state-cta"]');
+        if (cta) cta.addEventListener('click', () => navigateTo('add-item'));
+        return;
+    }
+
+    const draft = appState.exhibitionDraft || {
+        name: existing ? existing.name : '',
+        itemIds: existing ? [...existing.itemIds] : [],
+        saveError: ''
+    };
+    appState.exhibitionDraft = draft;
+
+    const orderedItems = draft.itemIds
+        .map(id => appState.data.items.find(i => i.id === id))
+        .filter(Boolean);
+
+    let checkboxesHtml = '';
+    for (const item of appState.data.items) {
+        const photoUrl = item.photo ? await image.blobToDataUrl(item.photo) : '';
+        checkboxesHtml += ui.createExhibitionItemCheckbox(item, photoUrl, draft.itemIds.includes(item.id));
+    }
+
+    let orderHtml = '';
+    for (let i = 0; i < orderedItems.length; i++) {
+        const orderItem = orderedItems[i];
+        const photoUrl = orderItem.photo ? await image.blobToDataUrl(orderItem.photo) : '';
+        orderHtml += ui.createExhibitionOrderRow(orderItem, photoUrl, i, orderedItems.length);
+    }
+
+    const html = `
+        <div class="create-exhibit-header">
+            <button type="button" class="btn-back" id="cancel-create-exhibit">← Back</button>
+            <h2>${editingId ? 'Edit Exhibit' : 'Create Exhibit'}</h2>
+        </div>
+        <form id="create-exhibit-form">
+            <div class="form-group">
+                <label for="exhibition-name" class="form-label">Exhibition Name *</label>
+                <input id="exhibition-name" name="name" class="form-input" value="${ui.escapeHtml(draft.name)}" placeholder="Name your exhibition">
+                ${draft.nameError ? `<div class="form-error">${ui.escapeHtml(draft.nameError)}</div>` : ''}
+            </div>
+            <div class="form-section">
+                <h3>Select Items</h3>
+                <div class="exhibit-select-list">${checkboxesHtml}</div>
+                ${draft.itemsError ? `<div class="form-error">${ui.escapeHtml(draft.itemsError)}</div>` : ''}
+            </div>
+            <div class="form-section">
+                <h3>Arrange Order</h3>
+                ${orderedItems.length === 0
+                    ? '<p class="empty-inline">Select items above to arrange their order.</p>'
+                    : `<ul class="exhibit-order-list">${orderHtml}</ul>`}
+            </div>
+            ${draft.saveError ? `<div class="form-error save-error" role="alert">${ui.escapeHtml(draft.saveError)}</div>` : ''}
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary" id="cancel-create-exhibit-2">Cancel</button>
+                <button type="submit" class="btn btn-primary">${editingId ? 'Save Exhibition' : 'Open Exhibition'}</button>
+            </div>
+        </form>
+    `;
+
+    container.innerHTML = html;
+
+    const form = container.querySelector('#create-exhibit-form');
+    const goBack = () => {
+        appState.exhibitionDraft = null;
+        const targetId = appState.editingExhibitionId;
+        appState.editingExhibitionId = null;
+        navigateTo(targetId ? 'exhibition' : 'exhibits', targetId);
+    };
+    container.querySelector('#cancel-create-exhibit').addEventListener('click', goBack);
+    form.querySelector('#cancel-create-exhibit-2').addEventListener('click', goBack);
+
+    form.querySelector('#exhibition-name').addEventListener('input', (e) => {
+        draft.name = e.target.value;
+    });
+
+    form.querySelectorAll('input[name="itemIds"]').forEach(checkbox => {
+        checkbox.addEventListener('change', (e) => {
+            const id = e.target.value;
+            if (e.target.checked) {
+                if (!draft.itemIds.includes(id)) draft.itemIds.push(id);
+            } else {
+                draft.itemIds = draft.itemIds.filter(existingId => existingId !== id);
+            }
+            renderCreateExhibitView();
+        });
+    });
+
+    form.querySelectorAll('.move-up-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const index = draft.itemIds.indexOf(btn.dataset.id);
+            if (index > 0) {
+                [draft.itemIds[index - 1], draft.itemIds[index]] = [draft.itemIds[index], draft.itemIds[index - 1]];
+                renderCreateExhibitView();
+            }
+        });
+    });
+
+    form.querySelectorAll('.move-down-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const index = draft.itemIds.indexOf(btn.dataset.id);
+            if (index >= 0 && index < draft.itemIds.length - 1) {
+                [draft.itemIds[index + 1], draft.itemIds[index]] = [draft.itemIds[index], draft.itemIds[index + 1]];
+                renderCreateExhibitView();
+            }
+        });
+    });
+
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        const nameValidation = exhibitions.validateExhibitionName(draft.name);
+        const itemsValidation = exhibitions.validateExhibitionItems(draft.itemIds, appState.data.items);
+        draft.nameError = nameValidation.valid ? '' : 'Give this exhibition a name first.';
+        draft.itemsError = itemsValidation.valid ? '' : 'Choose at least one item for this exhibition.';
+        draft.saveError = '';
+
+        if (!nameValidation.valid || !itemsValidation.valid) {
+            await renderCreateExhibitView();
+            return;
+        }
+
+        const result = editingId
+            ? exhibitions.updateExhibition(existing, { name: draft.name, itemIds: draft.itemIds }, appState.data.items)
+            : exhibitions.createExhibition({ id: db.generateId(), name: draft.name, itemIds: draft.itemIds }, appState.data.items);
+
+        if (result.error) {
+            draft.saveError = result.error;
+            await renderCreateExhibitView();
+            return;
+        }
+
+        const achievementsBefore = captureAchievementState();
+        try {
+            setLoading(true);
+            await db.put(db.STORE_NAMES.EXHIBITIONS, result);
+            appState.exhibitionDraft = null;
+            appState.editingExhibitionId = null;
+            await reloadData();
+            checkAchievements(achievementsBefore);
+            await navigateTo('exhibition', result.id);
+        } catch (error) {
+            console.error('Exhibition save failed:', error);
+            draft.saveError = "We couldn't save this exhibition yet. Your selections are still here. Try again.";
+            await renderCreateExhibitView();
+        } finally {
+            setLoading(false);
+        }
+    });
 }
 
 /**
@@ -786,4 +1115,55 @@ function setLoading(isLoading) {
     if (indicator) {
         indicator.style.display = isLoading ? 'block' : 'none';
     }
+}
+
+/**
+ * Capture current achievement state to compare against after a mutation.
+ * Only used around successful domain mutations; never on startup/reload alone.
+ * @returns {Object} - Achievement state before the mutation
+ */
+function captureAchievementState() {
+    return achievements.calculateAchievements(appState.data.items, appState.data.categories, appState.data.exhibitions);
+}
+
+/**
+ * Compare achievement state before/after a successful mutation and show
+ * feedback for any newly crossed (false -> true) achievement. Achievement
+ * failures must never block the core save/delete flow that already committed.
+ * @param {Object} beforeState - Achievement state captured before the mutation
+ */
+function checkAchievements(beforeState) {
+    try {
+        const afterState = achievements.calculateAchievements(appState.data.items, appState.data.categories, appState.data.exhibitions);
+        const feedback = achievements.getUnlockedFeedback(beforeState, afterState);
+        if (feedback.length > 0) {
+            showAchievementFeedback(feedback);
+        }
+    } catch (error) {
+        console.error('Achievement check failed:', error);
+    }
+}
+
+/**
+ * Render non-blocking private achievement feedback cards
+ * @param {Array<Object>} feedbackList - Newly unlocked achievement feedback
+ */
+function showAchievementFeedback(feedbackList) {
+    const container = document.getElementById('achievement-feedback-container');
+    if (!container) return;
+
+    feedbackList.forEach(feedback => {
+        const wrapper = document.createElement('div');
+        wrapper.innerHTML = ui.createAchievementCard(feedback).trim();
+        const card = wrapper.firstElementChild;
+        container.appendChild(card);
+
+        const dismiss = () => {
+            card.classList.add('achievement-card-hide');
+            card.addEventListener('animationend', () => card.remove(), { once: true });
+        };
+
+        card.querySelector('.achievement-card-dismiss').addEventListener('click', dismiss);
+        setTimeout(dismiss, 4000);
+    });
 }

@@ -72,6 +72,16 @@ export function updateCategory(category, updates) {
 }
 
 /**
+ * Remove a category from the category list (does not touch items)
+ * @param {Array<Object>} categories - All categories
+ * @param {string} categoryId - ID of category to remove
+ * @returns {Array<Object>} - Updated category list without the removed category
+ */
+export function removeCategory(categories, categoryId) {
+    return categories.filter(category => category.id !== categoryId);
+}
+
+/**
  * Handle category deletion - convert affected items to uncategorized
  * @param {Array<Object>} items - All items
  * @param {string} categoryId - ID of deleted category

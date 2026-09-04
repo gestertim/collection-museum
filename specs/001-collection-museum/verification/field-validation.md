@@ -3,7 +3,7 @@
 - 驗證日期：待執行
 - 對應 requirement：SC-009
 - 環境：真實 browser；成人教育者適當監督；流程依 `spec.md`
-- 狀態：待實地驗證 / Insufficient Sample
+- 狀態：Protocol Ready / 待實地驗證 / Insufficient Sample
 
 ## SC-009 Formal Protocol
 

@@ -54,6 +54,11 @@
                 <div id="exhibition-detail-content"></div>
             </section>
 
+            <!-- Create / Edit Exhibit View -->
+            <section id="view-create-exhibit" class="view" style="display: none;" aria-label="Create Exhibit">
+                <div id="create-exhibit-content"></div>
+            </section>
+
             <!-- Error View -->
             <section id="view-error" class="view" style="display: none;" aria-label="Error">
                 <div id="error-content"></div>
@@ -66,6 +71,9 @@
 
     <!-- Global loading indicator -->
     <div id="loading-indicator" style="display: none;" aria-label="Loading"></div>
+
+    <!-- Non-blocking private achievement feedback -->
+    <div id="achievement-feedback-container" aria-live="polite"></div>
 
     <!-- App initialization -->
     <script type="module">

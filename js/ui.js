@@ -128,6 +128,23 @@ export function createSuccessMessage(message) {
 }
 
 /**
+ * Create a single non-blocking achievement feedback card
+ * @param {Object} feedback - { id, title, description }
+ * @returns {string} - HTML
+ */
+export function createAchievementCard(feedback) {
+    return `
+        <div class="achievement-card" role="status" data-achievement-id="${escapeHtml(feedback.id)}">
+            <div class="achievement-card-body">
+                <strong class="achievement-card-title">${escapeHtml(feedback.title)}</strong>
+                <p class="achievement-card-description">${escapeHtml(feedback.description)}</p>
+            </div>
+            <button type="button" class="achievement-card-dismiss" aria-label="關閉">×</button>
+        </div>
+    `;
+}
+
+/**
  * Create empty state HTML
  * @param {string} icon - Emoji icon
  * @param {string} title - Empty state title
@@ -310,6 +327,92 @@ export function createCategorySelector(categories, currentCategoryId = null, nam
                 ${options.join('')}
             </select>
         </div>
+    `;
+}
+
+/**
+ * Create category management list (rename/delete controls)
+ * @param {Array<Object>} categories - Category list
+ * @param {Array<Object>} items - All items (used for per-category item counts)
+ * @param {string|null} [renamingCategoryId] - Category currently being renamed, if any
+ * @returns {string} - HTML
+ */
+export function createCategoryManagerList(categories, items = [], renamingCategoryId = null) {
+    if (categories.length === 0) {
+        return '<p class="empty-inline">No categories yet. Use "+ Add Category" to create one.</p>';
+    }
+
+    const rows = categories.map(category => {
+        const count = items.filter(item => item.categoryId === category.id).length;
+
+        if (category.id === renamingCategoryId) {
+            return `
+                <li class="category-manage-row" data-id="${escapeHtml(category.id)}">
+                    <form id="rename-category-form" class="category-inline-form" data-id="${escapeHtml(category.id)}">
+                        <input type="text" name="name" class="form-input" value="${escapeHtml(category.name)}" autocomplete="off">
+                        <button type="submit" class="btn btn-sm btn-primary">Save</button>
+                        <button type="button" class="btn btn-sm btn-secondary cancel-rename-category">Cancel</button>
+                    </form>
+                </li>
+            `;
+        }
+
+        return `
+            <li class="category-manage-row" data-id="${escapeHtml(category.id)}">
+                <span class="category-manage-name">${escapeHtml(category.name)}</span>
+                <span class="category-manage-count">${count} item${count === 1 ? '' : 's'}</span>
+                <button type="button" class="btn btn-sm rename-category-btn" data-id="${escapeHtml(category.id)}">Rename</button>
+                <button type="button" class="btn btn-sm btn-danger delete-category-btn" data-id="${escapeHtml(category.id)}">Delete</button>
+            </li>
+        `;
+    });
+
+    return `<ul class="category-manage-list">${rows.join('')}</ul>`;
+}
+
+/**
+ * Create a selectable item row for the Exhibition Builder
+ * @param {Object} item - Item data
+ * @param {string} [photoUrl] - Photo URL (optional)
+ * @param {boolean} checked - Whether the item is currently selected
+ * @returns {string} - HTML
+ */
+export function createExhibitionItemCheckbox(item, photoUrl = '', checked = false) {
+    const photo = photoUrl
+        ? `<img src="${photoUrl}" alt="${escapeHtml(item.name)}" class="exhibit-select-thumb">`
+        : `<div class="photo-placeholder no-photo-fallback exhibit-select-thumb"><span aria-hidden="true">🏛</span></div>`;
+
+    return `
+        <label class="exhibit-select-item">
+            <input type="checkbox" name="itemIds" value="${escapeHtml(item.id)}" ${checked ? 'checked' : ''}>
+            ${photo}
+            <span class="exhibit-select-name">${escapeHtml(item.name)}</span>
+        </label>
+    `;
+}
+
+/**
+ * Create an orderable row for the Exhibition Builder with Move Up/Move Down controls
+ * @param {Object} item - Item data
+ * @param {string} [photoUrl] - Photo URL (optional)
+ * @param {number} index - Position within the ordered list (0-based)
+ * @param {number} total - Total number of ordered items
+ * @returns {string} - HTML
+ */
+export function createExhibitionOrderRow(item, photoUrl = '', index = 0, total = 1) {
+    const photo = photoUrl
+        ? `<img src="${photoUrl}" alt="${escapeHtml(item.name)}" class="exhibit-order-thumb">`
+        : `<div class="photo-placeholder no-photo-fallback exhibit-order-thumb"><span aria-hidden="true">🏛</span></div>`;
+
+    return `
+        <li class="exhibit-order-row" data-id="${escapeHtml(item.id)}">
+            ${photo}
+            <span class="exhibit-order-name">${escapeHtml(item.name)}</span>
+            <div class="exhibit-order-controls">
+                <button type="button" class="btn btn-sm move-up-btn" data-id="${escapeHtml(item.id)}" ${index === 0 ? 'disabled' : ''}>Move Up</button>
+                <button type="button" class="btn btn-sm move-down-btn" data-id="${escapeHtml(item.id)}" ${index === total - 1 ? 'disabled' : ''}>Move Down</button>
+            </div>
+        </li>
     `;
 }
 

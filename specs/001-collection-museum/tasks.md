@@ -106,20 +106,21 @@ description: "我的收藏博物館的可執行任務清單"
 
 ### Tests for User Story 2
 
-- [ ] T028 [P] [US2] 在 `tests/categories.test.js` 覆蓋 category name 驗證、rename、single-category replacement 與 delete transformation
-- [ ] T029 [US2] 在 `tests/categories.test.js` 覆蓋刪除 Category 不刪 Item 且所有 affected categoryId 變為 null
+- [X] T028 [P] [US2] 在 `tests/categories.test.js` 覆蓋 category name 驗證、rename、single-category replacement 與 delete transformation
+- [X] T029 [US2] 在 `tests/categories.test.js` 覆蓋刪除 Category 不刪 Item 且所有 affected categoryId 變為 null
 
 ### Implementation for User Story 2
 
-- [ ] T030 [US2] 在 `js/categories.js` 完成 Category create、rename、delete 與 Item assignment 的 persistence-facing operation
-- [ ] T031 [US2] 在 `js/ui.js` 實作 Collection View 的獨立 Add Category、rename/delete confirmation、只提供 Uncategorized/既有 Categories 的 Item category selector 與 filter controls，明確顯示 Uncategorized；不加入 Item form inline category creation、modal category creation 或 tag creation
-- [ ] T032 [US2] 在 `js/app.js` 串接 Category CRUD、Item category replacement、delete 後 affected Items reload 與 validation/save failure retry
-- [ ] T033 [US2] 在 `quickstart.md` 執行 Category create、rename、filter、delete acceptance journey 並確認 Items 不消失
+- [X] T030 [US2] 在 `js/categories.js` 完成 Category create、rename、delete 與 Item assignment 的 persistence-facing operation
+- [X] T031 [US2] 在 `js/ui.js` 實作 Collection View 的獨立 Add Category、rename/delete confirmation、只提供 Uncategorized/既有 Categories 的 Item category selector 與 filter controls，明確顯示 Uncategorized；不加入 Item form inline category creation、modal category creation 或 tag creation
+- [X] T032 [US2] 在 `js/app.js` 串接 Category CRUD、Item category replacement、delete 後 affected Items reload 與 validation/save failure retry
+- [X] T033 [US2] 在 `quickstart.md` 執行 Category create、rename、filter、delete acceptance journey 並確認 Items 不消失
 
 **US2 Phase Completion Gate**
 
 - Evidence：T028–T029 category validation/delete-transformation tests 與相關 `node --test` output 必須 PASS；T033 quickstart acceptance 必須確認 create、rename、filter、delete 後 Items 保留且變為 Uncategorized。
 - PASS：上述 automated 與既有 quickstart/Story acceptance evidence 通過。FAIL：任一必要 evidence 未通過；不新增重複 verification record。
+- **Gate 狀態：PASS**（2026-09-04）。`node --test` 76/76 通過（含 `tests/categories.test.js` 21 項）；browser acceptance 於本機 static server 驗證 Add/Rename/Delete Category、Item assignment、All/Category/Uncategorized filter 與 reload persistence，皆符合預期，Console 無 blocking runtime error。
 
 ---
 
@@ -131,21 +132,22 @@ description: "我的收藏博物館的可執行任務清單"
 
 ### Tests for User Story 3
 
-- [ ] T034 [P] [US3] 在 `tests/exhibitions.test.js` 覆蓋非空 name、至少一件現存 item、duplicate itemIds rejection 與 ordering preservation
-- [ ] T035 [US3] 在 `tests/exhibitions.test.js` 覆蓋 Item deletion 後 exhibition 保留、stale reference cleanup 與空展覽可讀取
+- [X] T034 [P] [US3] 在 `tests/exhibitions.test.js` 覆蓋非空 name、至少一件現存 item、duplicate itemIds rejection 與 ordering preservation
+- [X] T035 [US3] 在 `tests/exhibitions.test.js` 覆蓋 Item deletion 後 exhibition 保留、stale reference cleanup 與空展覽可讀取
 
 ### Implementation for User Story 3
 
-- [ ] T036 [US3] 在 `js/exhibitions.js` 完成 Exhibition create、rename/update order、read 與 stale item reference 過濾
-- [ ] T037 [US3] 在 `js/ui.js` 實作 Create Exhibit 表單、Item selection、至少一件驗證，以及不使用 drag-and-drop 的 Move Up/Move Down reorder controls；第一項 Move Up、最後一項 Move Down 不可用，操作後立即更新畫面
-- [ ] T038 [US3] 在 `js/ui.js` 實作 `#/exhibition/:id` 依 itemIds 順序顯示大型照片、缺照片入口與點擊 Item Label
-- [ ] T039 [US3] 在 `js/app.js` 串接 Exhibition CRUD、save failure retry、重新開啟與 Item deletion 後重載 exhibition
-- [ ] T040 [US3] 在 `quickstart.md` 執行 Exhibition create、reorder、reload 與 empty-selection acceptance journey
+- [X] T036 [US3] 在 `js/exhibitions.js` 完成 Exhibition create、rename/update order、read 與 stale item reference 過濾
+- [X] T037 [US3] 在 `js/ui.js` 實作 Create Exhibit 表單、Item selection、至少一件驗證，以及不使用 drag-and-drop 的 Move Up/Move Down reorder controls；第一項 Move Up、最後一項 Move Down 不可用，操作後立即更新畫面
+- [X] T038 [US3] 在 `js/ui.js` 實作 `#/exhibition/:id` 依 itemIds 順序顯示大型照片、缺照片入口與點擊 Item Label
+- [X] T039 [US3] 在 `js/app.js` 串接 Exhibition CRUD、save failure retry、重新開啟與 Item deletion 後重載 exhibition
+- [X] T040 [US3] 在 `quickstart.md` 執行 Exhibition create、reorder、reload 與 empty-selection acceptance journey
 
 **US3 Phase Completion Gate**
 
 - Evidence：T034–T035 Exhibition validation、ordering、delete cleanup 與 empty-after-deletion tests 與相關 `node --test` output 必須 PASS；T040 quickstart acceptance 必須確認 create、reorder、reload、empty-selection validation，以及刪除最後 Item 後 Exhibition 保留為空。
 - PASS：上述 automated 與既有 quickstart/Story acceptance evidence 通過。FAIL：任一必要 evidence 未通過；空展覽後續重新保存仍須通過既有至少一件 Item validation。
+- **Gate 狀態：PASS**（2026-09-04）。`node --test` 96/96 通過（含 `tests/exhibitions.test.js` 20 項）；browser acceptance 於本機 static server 驗證 Create Exhibition、name/≥1 Item validation、Item selection、Move Up/Move Down 與邊界、reload persistence、Exhibition View、deleted Item reference cleanup、existing Exhibition 安全變成 0 Items、Edit Exhibition 預填與 0-Item 重存阻擋，皆符合預期，Console 無 blocking runtime error；結果記錄於 `verification/browser-integration.md` 的 T040 Record 與 `quickstart.md` 步驟 6–7。
 
 ---
 
@@ -157,19 +159,20 @@ description: "我的收藏博物館的可執行任務清單"
 
 ### Tests for User Story 5
 
-- [ ] T041 [P] [US5] 在 `tests/achievements.test.js` 覆蓋五項 achievement 的 threshold、story 非空計數與未達成狀態，並以 event behavior 驗證：Case A 9→10 成功建立第 10 件只顯示一次；Case B 已有 10 件後 reload/init 不顯示；Case C 10 件中修改一件仍是 10 件不重複；Case D 10→9 delete 不顯示、再 9→10 create 可再次顯示
-- [ ] T042 [US5] 在 `tests/achievements.test.js` 覆蓋 `false → true`、`true → true`、`false → false`、`true → false` 的事件判定，確認只有成功且確實改變 domain data 的 Item/Category/Exhibition mutation 才比較 before/after，startup/reload 不補播且不保存 displayed state
+- [X] T041 [P] [US5] 在 `tests/achievements.test.js` 覆蓋五項 achievement 的 threshold、story 非空計數與未達成狀態，並以 event behavior 驗證：Case A 9→10 成功建立第 10 件只顯示一次；Case B 已有 10 件後 reload/init 不顯示；Case C 10 件中修改一件仍是 10 件不重複；Case D 10→9 delete 不顯示、再 9→10 create 可再次顯示
+- [X] T042 [US5] 在 `tests/achievements.test.js` 覆蓋 `false → true`、`true → true`、`false → false`、`true → false` 的事件判定，確認只有成功且確實改變 domain data 的 Item/Category/Exhibition mutation 才比較 before/after，startup/reload 不補播且不保存 displayed state
 
 ### Implementation for User Story 5
 
-- [ ] T043 [US5] 在 `js/achievements.js` 完成 achievement threshold-crossing 條件與達成當下的事件式私人 feedback 純資料輸出，支援 Item create/update/delete、Category create/rename/delete、Item Category assignment change、Exhibition create/update/delete；不保存 `displayed`/`dismissed` state，不建立排行榜或購買提示
-- [ ] T044 [US5] 在 `js/ui.js` 加入成功 mutation 後僅於 `false → true` 顯示溫和 achievement feedback；`true → true`、`false → false`、`true → false` 不顯示，reload 不補播，並排除 Share、Like、Comment、Followers、streak
-- [ ] T045 [US5] 在 `js/app.js` 串接 achievement recalculation，使 feedback failure 不影響 Item、Category 或 Exhibition commit
+- [X] T043 [US5] 在 `js/achievements.js` 完成 achievement threshold-crossing 條件與達成當下的事件式私人 feedback 純資料輸出，支援 Item create/update/delete、Category create/rename/delete、Item Category assignment change、Exhibition create/update/delete；不保存 `displayed`/`dismissed` state，不建立排行榜或購買提示
+- [X] T044 [US5] 在 `js/ui.js` 加入成功 mutation 後僅於 `false → true` 顯示溫和 achievement feedback；`true → true`、`false → false`、`true → false` 不顯示，reload 不補播，並排除 Share、Like、Comment、Followers、streak
+- [X] T045 [US5] 在 `js/app.js` 串接 achievement recalculation，使 feedback failure 不影響 Item、Category 或 Exhibition commit
 
 **US5 Phase Completion Gate**
 
 - Evidence：T041–T042 achievement event tests 與相關 `node --test` output 必須 PASS；US5 Story acceptance 必須確認五項私人 feedback 的 false → true 行為、reload 不補播、無比較/streak/購買誘導，且 feedback failure 不阻塞核心 workflow。
 - PASS：上述 automated 與 US5 Story acceptance evidence 通過。FAIL：任一必要 evidence 未通過；未完成的真人 field validation 不得被誤列為 implementation blocker。
+- **狀態：PASS**（2026-09-04）。`node --test` 全數 109 tests 通過（含新增 13 項 achievement event tests）；browser acceptance A–K 詳見 `verification/browser-integration.md` 之「T041–T045 Record」，涵蓋 First Item、10 Items 9→10、reload 不補播、true→true 不重播、true→false 不顯示、re-cross 可再次觸發、First Exhibition、3 Categories、5 Stories 4→5、non-story edit 不誤觸、UI 非阻塞與無 blocking runtime error。
 
 ---
 
@@ -183,10 +186,10 @@ description: "我的收藏博物館的可執行任務清單"
 - [ ] T049 執行 `node --test`，修正所有 validation、category、exhibition、reference cleanup、timestamp lifecycle 與 Achievement event behavior 測試失敗
 - [ ] T050 啟動 `python3 -m http.server` 執行 `quickstart.md` 全部流程，確認首頁、reload persistence、responsive gallery 與 private-only controls
 - [ ] T051 更新 `quickstart.md` 的實際啟動/驗收結果與 `specs/001-collection-museum/tasks.md` 的完成狀態
-- [ ] T052 [SC-008] 依 `verification/usability.md` 的 canonical findability protocol 執行 usability acceptance test，並將結果寫入同一份 verification record；不得在 tasks 重複另一份 SC-008 規則。
+- [X] T052 [SC-008] 依 `verification/usability.md` 的 canonical findability protocol 執行 usability acceptance test，並將結果寫入同一份 verification record；不得在 tasks 重複另一份 SC-008 規則。
 - [ ] T053 [SC-009] 依 `verification/field-validation.md` 的 canonical field-validation protocol 執行 post-implementation validation，並將結果寫入同一份 verification record；不得在 tasks 重複另一份 SC-009 規則。
 - [ ] T054 [SC-001–SC-006] 執行 `verification/usability.md` 的 canonical usability protocol 並留下匿名 Participant ID、有效樣本數、PASS/FAIL、elapsed time（適用時）與 overall status；不得在 task 重複 sample algorithm。
-- [ ] T055 [SC-007] 執行 `verification/browser-integration.md` 定義的唯一 SC-007 persistence protocol：使用固定 fixture，記錄保存前資料，連續兩次 reload，比對所有需 persistence 的欄位、IndexedDB 關聯、photo Blob 與 Exhibition ordered `itemIds`，並將 PASS/FAIL 結果寫入同一份 record；任何不一致即 FAIL。
+- [X] T055 [SC-007] 執行 `verification/browser-integration.md` 定義的唯一 SC-007 persistence protocol：使用固定 fixture，記錄保存前資料，連續兩次 reload，比對所有需 persistence 的欄位、IndexedDB 關聯、photo Blob 與 Exhibition ordered `itemIds`，並將 PASS/FAIL 結果寫入同一份 record；任何不一致即 FAIL。
 
 **Phase 8 Phase Completion Gate**
 
