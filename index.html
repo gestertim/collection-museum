@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="我的收藏博物館 - Collection Museum">
+    <title>我的收藏博物館 Collection Museum</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Museum Navigation Header -->
+        <header id="header" role="banner">
+            <h1 id="app-title">My Collection Museum</h1>
+            <nav id="main-nav" role="navigation" aria-label="主導覽">
+                <ul id="nav-list">
+                    <li><button type="button" id="nav-museum" class="nav-link" data-view="museum">Museum</button></li>
+                    <li><button type="button" id="nav-collection" class="nav-link" data-view="collection">Collection</button></li>
+                    <li><button type="button" id="nav-exhibits" class="nav-link" data-view="exhibits">Exhibits</button></li>
+                    <li><button type="button" id="nav-add-item" class="nav-link" data-view="add-item">Add Item</button></li>
+                </ul>
+            </nav>
+        </header>
+
+        <!-- Main Content Area -->
+        <main id="main-content" role="main">
+            <!-- Museum View (default) -->
+            <section id="view-museum" class="view" aria-label="Museum Home">
+                <div id="museum-content"></div>
+            </section>
+
+            <!-- Collection View -->
+            <section id="view-collection" class="view" style="display: none;" aria-label="Collection">
+                <div id="collection-content"></div>
+            </section>
+
+            <!-- Exhibits View -->
+            <section id="view-exhibits" class="view" style="display: none;" aria-label="Exhibits">
+                <div id="exhibits-content"></div>
+            </section>
+
+            <!-- Add Item View (Form) -->
+            <section id="view-add-item" class="view" style="display: none;" aria-label="Add Item Form">
+                <div id="add-item-content"></div>
+            </section>
+
+            <!-- Item Detail View -->
+            <section id="view-item-detail" class="view" style="display: none;" aria-label="Item Detail">
+                <div id="item-detail-content"></div>
+            </section>
+
+            <!-- Exhibition Detail View -->
+            <section id="view-exhibition-detail" class="view" style="display: none;" aria-label="Exhibition Detail">
+                <div id="exhibition-detail-content"></div>
+            </section>
+
+            <!-- Error View -->
+            <section id="view-error" class="view" style="display: none;" aria-label="Error">
+                <div id="error-content"></div>
+            </section>
+        </main>
+
+        <!-- Dialogs and Overlays -->
+        <div id="dialogs-container"></div>
+    </div>
+
+    <!-- Global loading indicator -->
+    <div id="loading-indicator" style="display: none;" aria-label="Loading"></div>
+
+    <!-- App initialization -->
+    <script type="module">
+        import { initApp } from './js/app.js';
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            initApp();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,32 @@
+# Node.js
+node_modules/
+*.log
+npm-debug.log*
+*.pid
+*.seed
+
+# Build outputs
+dist/
+build/
+out/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE and editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Test coverage
+coverage/
+
+# Cache
+.cache/
+*.cache

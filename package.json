@@ -1,0 +1,19 @@
+{
+  "name": "collection-museum",
+  "version": "1.0.0",
+  "description": "My Collection Museum - 我的收藏博物館",
+  "type": "module",
+  "main": "js/app.js",
+  "scripts": {
+    "test": "node --test"
+  },
+  "keywords": [
+    "collection",
+    "museum",
+    "personal",
+    "indexeddb",
+    "vanilla-js"
+  ],
+  "author": "",
+  "license": "MIT"
+}
