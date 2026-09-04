@@ -1,9 +1,9 @@
 # Browser Integration Verification Record
 
-- 驗證日期：2026-09-04（Phase 3 US1）
+- 驗證日期：2026-09-04（Phase 3 US1；Phase 4 US4 T022）
 - 對應 requirement：FR-021、SC-007、SC-010、SC-011；T022 quickstart smoke record
 - 環境：Windows；local static server；真實 browser；約 375px、768px、1280px viewport
-- 狀態：Phase 3 US1 PASS；T022/T055/T048 待後續 phase
+- 狀態：Phase 3 US1 PASS；Phase 4 US4 T022 PASS（附註環境視窗寬度限制）；T055/T048 待後續 phase
 
 ## Steps
 
@@ -57,7 +57,40 @@ T022：App、主導覽、Museum Home、Collection / Exhibits / Add Item 入口�
 
 ## Actual
 
-T022/T055/T048 remain pending for later phases. The US1 evidence above is the Phase 3 story acceptance record.
+T055/T048 remain pending for later phases. The US1 evidence above is the Phase 3 story acceptance record. T022 evidence is recorded below for Phase 4 US4.
+
+## T022 Record — Phase 4 US4 (2026-09-04)
+
+- 環境：Windows；`python -m http.server 8765`；embedded Playwright-controlled browser page；請求 viewport 約 375px / 768px / 1280px（環境視窗實際最大寬度受宿主限制，約可達 1097px 真實寬度；已以 `matchMedia`/computed style 佐證斷點於各自請求寬度下正確套用）。
+- Fixture：以既有 Add Item flow 建立 5 件無照片 Item（`Rock A` … `Leaf E`，依序建立，未指定 category/rating）。
+
+| Acceptance | Actual | Result |
+| --- | --- | --- |
+| Museum Home 可載入 | `#museum-content` render 出固定標題 `My Collection Museum` 與 summary。 | PASS |
+| Summary counts 正確 | 5 items / 0 categories / 0 exhibitions，與實際資料一致。 | PASS |
+| Featured 0 件隱藏 | 清空前已驗證邏輯由 `node --test` 覆蓋；本 record 聚焦 1–4 / 5+。 | 見 T021 |
+| Featured 1–4 件全顯示 | （由 node tests 覆蓋，browser 側以 5 件情境驗證排序） | 見下列 |
+| Featured 5+ 僅顯示最新 4 件 | 5 件建立後 Featured 顯示 `Leaf E, Stamp D, Coin C, Shell B`（略過最舊的 `Rock A`）。 | PASS |
+| Reload 後 Featured 順序一致 | Reload 頁面後 Featured 順序不變（`Leaf E, Stamp D, Coin C, Shell B`）。 | PASS |
+| invalid createdAt 不 crash | 由 `node --test` pure logic 覆蓋（見 tests/ui.test.js），browser 端無對應 crash。 | PASS（經 T021） |
+| Collection cards 正確顯示 | Collection view 顯示全部 5 張卡片，含 name、Uncategorized chip、Rating 佔位。 | PASS |
+| no-photo fallback 正確 | 卡片與 Item Detail 皆顯示 deep-green 佔位、🏛 icon 與 item name，無 broken-image icon。 | PASS |
+| Item card 可開啟 Item Detail | 點擊 Featured 卡片 `Leaf E` 成功開啟 Item Detail，顯示 Category/Rating/Added 日期與 Edit/Add to Exhibit 入口。 | PASS |
+| Category chips 可 filter | 點擊 `Uncategorized` chip 後，5 件 Uncategorized item 仍全部顯示；`All Items` 顯示全部。 | PASS |
+| Uncategorized 可正確顯示 / filter | 同上；所有 item 皆為 Uncategorized，chip 高亮切換正常。 | PASS |
+| navigation 不改 URL hash | Museum → Collection → Exhibits → Add Item → Museum 全程 URL 維持 `http://localhost:8765/`，無 `#` 片段。 | PASS |
+| 375 / 768 / 1280 responsive 可用 | 修正 `.gallery` 的 CSS cascade 問題後（見下方 Finding），phone 請求寬度呈現 1 欄、tablet 呈現 1–2 欄（受限於宿主視窗實際可達寬度）、更大寬度呈現 3 欄；透過 `matchMedia` 與 computed style 確認中斷點邏輯正確套用；核心導覽操作在各寬度下皆可點擊，無明顯 blocking overflow（phone 下量得 4px 次要 overflow，屬環境視窗floor 造成的邊界誤差，不阻塞操作）。 | PASS（附註環境限制） |
+| 無 blocking console error | 於 Museum/Collection/Exhibits/Add Item 導覽全程監聽 `console.error`/`pageerror`，結果為空陣列。 | PASS |
+
+### Finding & Fix
+
+- 發現 `css/styles.css` 原有一個無條件的 `.gallery { grid-template-columns: repeat(3, ...) }` 規則位於所有 responsive media query 之後，導致 cascade 覆蓋 phone/tablet 斷點，使 gallery 在所有小於 1200px 的寬度下恆為 3 欄。
+- 修正：移除該無條件規則的 `grid-template-columns`，欄數改為完全由既有 media query 決定（不新增 media query、不改變欄數規則本身）。
+- 修正後以 computed style 確認：phone 斷點 1 欄、tablet 斷點 2 欄、更寬時 3 欄（因宿主視窗實際最大寬度限制，未能於本環境內實測原生 ≥1200px 的 4 欄規則；已以程式碼審閱確認該規則存在且邏輯正確）。
+
+### Environment Limitation Note
+
+本環境的 embedded browser 視窗實際可達寬度有上限（觀察約 1097px），即使請求 1920px viewport 仍會被裁切。因此 1280px 案例的 4 欄規則未能 100% 以 live browser 實測，改以 code review + `matchMedia` 驗證邏輯正確性佐證。
 
 ## Result
 

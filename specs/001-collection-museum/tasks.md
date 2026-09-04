@@ -80,16 +80,16 @@ description: "我的收藏博物館的可執行任務清單"
 
 ### Tests for User Story 4
 
-- [ ] T021 [P] [US4] 在既有 `js/ui.js` 的 pure function 邊界實作並以 `node:test` 驗證 `getMuseumSummary(items, categories, exhibitions)` 與 Featured Items selection/sorting helper；驗證 summary counts，以及 valid `createdAt` descending、相同 timestamp 以 `id` 升冪、最多 4 件、invalid/missing timestamp 排在 valid timestamp 後方且彼此以 `id` 升冪，不依賴 DOM、IndexedDB、Canvas 或 browser globals，且不建立 summary.js、recommendation module、新 domain layer 或 summary contract
-- [ ] T022 [US4] 執行輕量 browser smoke / quickstart verification：使用支援 IndexedDB、Canvas、ES Modules 的現代瀏覽器，透過既定 local static server，以約 1280px desktop viewport，使用既定 quickstart fixture 或最小可重現 sample data（不重新定義 SC-001～SC-011 fixture）。確認 App 可開啟、主導覽可操作、Museum Home 可 render、Collection / Exhibits / Add Item 入口可進入且無 blocking runtime error；Museum summary 三個數字的 DOM 顯示由此 browser check 驗證。結果寫入 `verification/browser-integration.md` 的 T022 record，並記錄 environment、fixture、steps、Expected、Actual、PASS/FAIL 或 Insufficient Sample
+- [X] T021 [P] [US4] 在既有 `js/ui.js` 的 pure function 邊界實作並以 `node:test` 驗證 `getMuseumSummary(items, categories, exhibitions)` 與 Featured Items selection/sorting helper；驗證 summary counts，以及 valid `createdAt` descending、相同 timestamp 以 `id` 升冪、最多 4 件、invalid/missing timestamp 排在 valid timestamp 後方且彼此以 `id` 升冪，不依賴 DOM、IndexedDB、Canvas 或 browser globals，且不建立 summary.js、recommendation module、新 domain layer 或 summary contract
+- [X] T022 [US4] 執行輕量 browser smoke / quickstart verification：使用支援 IndexedDB、Canvas、ES Modules 的現代瀏覽器，透過既定 local static server，以約 1280px desktop viewport，使用既定 quickstart fixture 或最小可重現 sample data（不重新定義 SC-001～SC-011 fixture）。確認 App 可開啟、主導覽可操作、Museum Home 可 render、Collection / Exhibits / Add Item 入口可進入且無 blocking runtime error；Museum summary 三個數字的 DOM 顯示由此 browser check 驗證。結果寫入 `verification/browser-integration.md` 的 T022 record，並記錄 environment、fixture、steps、Expected、Actual、PASS/FAIL 或 Insufficient Sample
 
 ### Implementation for User Story 4
 
-- [ ] T023 [US4] 在 `js/ui.js` 實作 `#/museum` 的固定標題「My Collection Museum」、Items/Categories/Exhibits summary、Featured Items、My Exhibits、Add New Item 與首次使用 empty state；不加入 title 編輯或 Settings
-- [ ] T024 [US4] 在 `js/ui.js` 實作 `#/collection` photo cards、只負責 filter 的 All/既有 Category/Uncategorized controls、獨立 Add Category control、selected state、museum-style 缺照片 placeholder 與 Item Label click action
-- [ ] T025 [US4] 在 `js/ui.js` 實作 `#/exhibits` cards 的 name、representative image、item count、Create Exhibit、無 Exhibition 時的友善 empty state 與 Create Exhibit CTA，以及 error/not-found 狀態
-- [ ] T026 [US4] 在 `js/app.js` 串接 Museum、Collection、Exhibits 的資料讀取、in-memory view switching、Item/Exhibition detail state 與 mutation 後同步 render
-- [ ] T027 [US4] 在 `css/styles.css` 完成 photo-first gallery 的 phone 1–2 欄、tablet 2–3 欄、desktop 3–4 欄及可閱讀 Museum Label 寬度
+- [X] T023 [US4] 在 `js/ui.js` 實作 `#/museum` 的固定標題「My Collection Museum」、Items/Categories/Exhibits summary、Featured Items、My Exhibits、Add New Item 與首次使用 empty state；不加入 title 編輯或 Settings
+- [X] T024 [US4] 在 `js/ui.js` 實作 `#/collection` photo cards、只負責 filter 的 All/既有 Category/Uncategorized controls、獨立 Add Category control、selected state、museum-style 缺照片 placeholder 與 Item Label click action
+- [X] T025 [US4] 在 `js/ui.js` 實作 `#/exhibits` cards 的 name、representative image、item count、Create Exhibit、無 Exhibition 時的友善 empty state 與 Create Exhibit CTA，以及 error/not-found 狀態
+- [X] T026 [US4] 在 `js/app.js` 串接 Museum、Collection、Exhibits 的資料讀取、in-memory view switching、Item/Exhibition detail state 與 mutation 後同步 render
+- [X] T027 [US4] 在 `css/styles.css` 完成 photo-first gallery 的 phone 1–2 欄、tablet 2–3 欄、desktop 3–4 欄及可閱讀 Museum Label 寬度
 
 **US4 Phase Completion Gate**
 

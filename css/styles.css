@@ -534,10 +534,10 @@ label {
 }
 
 /* Gallery Grid */
+/* Column count is set exclusively by the responsive media queries above */
 .gallery {
     display: grid;
     gap: var(--spacing-lg);
-    grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .gallery-item {

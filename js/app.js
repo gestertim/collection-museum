@@ -292,7 +292,7 @@ async function renderCollectionView() {
     `;
 
     if (appState.data.items.length === 0) {
-        html += ui.createEmptyState('📦', 'No Items Yet', 'Start adding items to your collection');
+        html += ui.createEmptyState('📦', 'No Items Yet', 'Start adding items to your collection', 'Add Item');
     } else {
         const filteredItems = ui.filterItemsByCategory(appState.data.items, appState.collectionFilter);
         if (filteredItems.length === 0) {
@@ -330,6 +330,13 @@ async function renderCollectionView() {
     if (addCatBtn) {
         addCatBtn.addEventListener('click', () => {
             addCatBtn.setAttribute('aria-label', 'Category management is available in a later phase');
+        });
+    }
+
+    const emptyStateCTA = container.querySelector('[onclick*="empty-state-cta"]');
+    if (emptyStateCTA) {
+        emptyStateCTA.addEventListener('click', () => {
+            navigateTo('add-item');
         });
     }
 }
@@ -707,7 +714,7 @@ async function renderExhibitionDetailView() {
     let html = `
         <div class="exhibition-detail">
             <div class="exhibition-header">
-                <button class="btn-back" onclick="window.history.back()">← Back</button>
+                <button class="btn-back" id="back-to-exhibits">← Back</button>
                 <h2>${ui.escapeHtml(exhibition.name)}</h2>
                 <button class="btn-edit">Edit</button>
             </div>
@@ -732,6 +739,8 @@ async function renderExhibitionDetailView() {
     container.innerHTML = html;
 
     // Attach event listeners
+    container.querySelector('#back-to-exhibits').addEventListener('click', () => navigateTo('exhibits'));
+
     container.querySelectorAll('.gallery-item').forEach(card => {
         card.addEventListener('click', () => {
             navigateTo('item', card.dataset.id);
