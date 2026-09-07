@@ -1,0 +1,2 @@
+New-Item -ItemType Directory -Force .github\workflows
+notepad .github\workflows\deploy-pages.yml
